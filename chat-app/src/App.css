@@ -1,0 +1,55 @@
+/* src/App.css */
+
+.app {
+    display: flex;
+    height: 100vh;
+    background-color: #f7f7f7;
+}
+
+.chat-list {
+    width: 30%;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+}
+
+.chat-window {
+    width: 70%;
+    padding: 20px;
+}
+
+.chat-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.chat-item.unread {
+    background-color: #e0f7fa;
+}
+
+.messages {
+    height: 400px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.sent {
+    background-color: #d1c4e9;
+    text-align: right;
+}
+
+.received {
+    background-color: #cfe7f3;
+}
+.avatar {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+object-fit: cover;
+margin-right: 12px;
+}

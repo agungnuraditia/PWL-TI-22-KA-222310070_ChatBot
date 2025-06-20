@@ -1,0 +1,165 @@
+.chat-window {
+width: 100%;
+height: 100%;
+display: flex;
+flex-direction: column;
+font-family: sans-serif;
+}
+
+.chat-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 16px;
+border-bottom: 1px solid #ddd;
+}
+
+.user-info {
+display: flex;
+align-items: center;
+}
+
+.avatar-header {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+margin-right: 10px;
+}
+
+.chat-actions .icon {
+width: 50px;
+height: 50px;
+margin-left: 24px;
+cursor: pointer;
+}
+
+.messages {
+flex: 2;
+padding: 36px;
+overflow-y: auto;
+background-color: #f9f9f9;
+}
+
+.message {
+max-width: 60%;
+padding: 10px 14px;
+border-radius: 12px;
+margin-bottom: 12px;
+position: relative;
+font-size: 14px;
+}
+
+.sent {
+align-self: flex-end;
+background-color: #6366f1;
+color: white;
+border-top-right-radius: 0;
+}
+
+.received {
+align-self: flex-start;
+background-color: #fff;
+color: #333;
+border: 1px solid #ddd;
+border-top-left-radius: 0;
+}
+
+.chat-input {
+display: flex;
+padding: 10px;
+border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+flex: 1;
+padding: 10px;
+border: 1px solid #ccc;
+border-radius: 8px;
+margin-right: 8px;
+}
+
+.chat-input button {
+background-color: #6366f1;
+color: white;
+padding: 10px 16px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+}
+.chat-window {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: sans-serif;
+}
+
+.messages {
+  margin-bottom: 16px;
+}
+
+.message-wrapper {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.message-wrapper.sent {
+  justify-content: flex-end;
+}
+
+.message-wrapper.received {
+  justify-content: flex-start;
+}
+
+.message {
+background-color: #e5e5ea;
+padding: 10px;
+border-radius: 8px;
+max-width: 60%;
+}
+
+.message.sent {
+background-color: #6c63ff;
+color: white;
+}
+.avatars {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+margin: 0 8px;
+}
+.kirim-pesan {
+  background-color: #4CAF50; /* hijau */
+color: white;
+padding: 10px 20px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-size: 16px;
+transition: background-color 0.3s ease;
+}
+.kirim-button:hover {
+background-color: #45a049;
+}
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.chat-input button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
