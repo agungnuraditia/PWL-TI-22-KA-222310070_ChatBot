@@ -88,13 +88,28 @@ cursor: pointer;
 }
 .chat-window {
   padding: 16px;
-  max-width: 600px;
+  max-width: 1000px; /* sebelumnya 600px */
+  width: 100%;
   margin: 0 auto;
   font-family: sans-serif;
+  flex-grow: 1;
+}
+.classification {
+  font-size: 12px;
+  color: #000000;
+  margin-left: 10px;
+  display: inline;
 }
 
 .messages {
   margin-bottom: 16px;
+}
+.sender-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000000;
+  margin-left: 8px;
+  margin-bottom: 4px;
 }
 
 .message-wrapper {
@@ -113,13 +128,21 @@ cursor: pointer;
 
 .message {
 background-color: #e5e5ea;
-padding: 10px;
+margin-left: 500px;
+padding: 500px;
 border-radius: 8px;
 max-width: 60%;
+white-space: normal;      /* penting untuk wrapping yang wajar */
+  word-wrap: break-word;    /* pastikan memecah kata panjang */
+  display: inline-block;    /* agar span bisa satu baris */
 }
-
+.message span {
+  display: inline;
+}
 .message.sent {
-background-color: #6c63ff;
+margin-left: 500px;
+padding: 10px 15px;
+background-color: hsl(243, 100%, 69%);
 color: white;
 }
 .avatars {

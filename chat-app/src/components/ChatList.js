@@ -3,12 +3,6 @@ import React from 'react';
 const ChatList = () => {
     const chats = [
     { name: "Irfan", unread: true, avatar: "/avatars/irfan.jpg" },
-    { name: "Pak Anton", unread: false, avatar: "/avatars/anton.jpg" },
-    { name: "Pak Jemy Arieswanto", unread: false, avatar: "/avatars/jemy.png" },
-    { name: "Pak Septian Cahyadi", unread: false, avatar: "/avatars/septian.jpg" },
-    { name: "Pak Edi Sekprod", unread: false, avatar: "/avatars/edi.png" },
-    { name: "Pak Isnan MTK", unread: false, avatar: "/avatars/isnan.jpg" },
-    { name: "Faisal", unread: false, avatar: "/avatars/faisal.jpg" },
     ];
 
     return (

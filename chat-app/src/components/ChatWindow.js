@@ -6,43 +6,26 @@ const ChatWindow = () => {
   const [telegramChats, setTelegramChats] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
 
-  // Pesan awal dummy
-  const messages = [
-    { text: "Halo Agung, bisakah kamu bantu saya mengerjakan tugas bahasa indonesia?", sender: "Irfan" },
-    { text: "Ya, Tentu saja bisa", sender: "Agung" },
-    { text: "Bisakah kita bertemu esok hari jam 09.00 am?", sender: "Irfan" },
-  ];
-
-  // Ambil pesan dari backend setiap 2 detik
+  // Ambil chat setiap 1.5 detik dari server
   useEffect(() => {
     const interval = setInterval(() => {
       axios.get('http://localhost:5000/chats')
-        .then((res) => setTelegramChats(res.data))
-        .catch((err) => console.error(err));
-    }, 2000);
+        .then(res => setTelegramChats(res.data))
+        .catch(err => console.error("❌ Error get chats:", err));
+    }, 1500);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Fungsi kirim pesan ke backend (dan diteruskan ke Telegram bot)
-  const handleSend = () => {
-    if (!inputMessage.trim()) return;
+const handleSend = () => {
+  if (!inputMessage.trim()) return;
 
-    axios.post('http://localhost:5000/send-message', { text: inputMessage })
-      .then(() => {
-        setInputMessage(""); // Kosongkan input setelah terkirim
-      })
-      .catch(err => console.error("Gagal kirim:", err));
-  };
+  const messageToSend = inputMessage; // simpan isi
+  setInputMessage(""); // langsung kosongkan input!
 
-  // Gabungkan semua pesan: lokal + dari Telegram
-  const allMessages = [
-    ...messages,
-    ...telegramChats.map(chat => ({
-      text: `${chat.text} \n(Klasifikasi: ${chat.classification})`,
-      sender: chat.user || "TelegramUser"
-    }))
-  ];
+  axios.post('http://localhost:5000/send-message', { text: messageToSend })
+    .catch(err => console.error("Gagal kirim:", err));
+};
 
   return (
     <div className="chat-window">
@@ -50,7 +33,7 @@ const ChatWindow = () => {
       <div className="chat-header">
         <div className="user-info">
           <img src="/avatars/irfan.jpg" alt="Irfan" className="avatar-header" />
-          <h3>Irfan</h3>
+          <h3>ChatBot - Irfan</h3>
         </div>
         <div className="chat-actions">
           <img src="/icons/phone.png" alt="Call" className="icon" />
@@ -61,38 +44,52 @@ const ChatWindow = () => {
 
       {/* CHAT MESSAGES */}
       <div className="messages">
-        {allMessages.map((msg, index) => (
-          <div
-            key={index}
-            className={`message-wrapper ${msg.sender === "Irfan" ? 'sent' : 'received'}`}
-          >
-            {/* Avatar kiri (untuk Agung/Bot) */}
-            {msg.sender !== "Irfan" && (
-              <img
-                src={`/avatars/${msg.sender.toLowerCase()}.jpg`}
-                alt={msg.sender}
-                className="avatars"
-                onError={(e) => { e.target.style.display = 'none' }}
-              />
-            )}
+        {telegramChats.map((msg, index) => {
+          const isSender = msg.from === 'sender';
+          const senderName = msg.user || (isSender ? "Irfan" : "Bot");
 
-            <div className={`message ${msg.sender === "Irfan" ? 'sent' : 'received'}`}>
-              {msg.text}
+          return (
+            <div key={index} className={`message-wrapper ${isSender ? 'sent' : 'received'}`}>
+
+              {!isSender && (
+                <img
+                  src="/avatars/agung.jpg"
+                  alt="Bot"
+                  className="avatars"
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
+              )}
+
+              <div>
+                <p className="sender-name">{senderName}</p>
+                <div className={`message ${isSender ? 'sent' : 'received'}`}>
+  {msg.text.includes('Pesan Anda diklasifikasikan sebagai:') ? (
+    <span>
+      Pesan Anda diklasifikasikan sebagai: 
+      <strong style={{ marginLeft: '5px' }}>
+        {msg.text.split(':')[1]?.trim()}
+      </strong>
+    </span>
+  ) : (
+    msg.text
+  )}
+</div>
+              </div>
+
+              {/* Avatar kanan untuk Irfan */}
+              {isSender && (
+                <img
+                  src="/avatars/irfan.jpg"
+                  alt="Irfan"
+                  className="avatars"
+                />
+              )}
             </div>
-
-            {/* Avatar kanan (untuk Irfan) */}
-            {msg.sender === "Irfan" && (
-              <img
-                src={`/avatars/${msg.sender.toLowerCase()}.jpg`}
-                alt={msg.sender}
-                className="avatars"
-              />
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* INPUT & BUTTON */}
+      {/* INPUT */}
       <div className="chat-input">
         <input
           type="text"

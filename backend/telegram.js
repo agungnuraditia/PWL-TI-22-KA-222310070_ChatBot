@@ -3,73 +3,104 @@ const Sentiment = require('sentiment');
 const express = require('express');
 const cors = require('cors');
 
+// Konfigurasi bot dan server
 const app = express();
-const token = '7919715969:AAEL6YxFPysmh4jngTgMwIAfO_YoPZCDV-0'; // token dari BotFather
-const bot = new TelegramBot(token, { polling: true });
 const sentiment = new Sentiment();
+const token = '7919715969:AAEL6YxFPysmh4jngTgMwIAfO_YoPZCDV-0'; // <- GANTI dengan token bot kamu dari @BotFather
+const bot = new TelegramBot(token, { polling: true });
 
 app.use(cors());
 app.use(express.json());
 
 let chatLogs = [];
 
-// ✅ Handler untuk pesan dari Telegram
+// ✅ 1. Bot merespons pesan dari Telegram
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
-  const messageText = msg.text;
+  const text = msg.text;
 
-  const result = sentiment.analyze(messageText);
-  let classification = 'Netral';
-  if (result.score > 0) classification = 'Positif';
-  else if (result.score < 0) classification = 'Negatif';
+  console.log('💬 Pesan diterima dari chat_id:', chatId);
 
-  const response = `Pesan Anda diklasifikasikan sebagai: *${classification}*`;
-
-  chatLogs.push({
-    user: msg.from.username || 'Pengguna',
-    text: messageText,
-    classification,
-    date: new Date()
-  });
-
-  bot.sendMessage(chatId, response, { parse_mode: 'Markdown' });
-});
-
-// ✅ Endpoint untuk frontend React mengambil semua chat
-app.get('/chats', (req, res) => {
-  res.json(chatLogs);
-});
-
-// ✅ Endpoint frontend mengirim pesan → dianalisis → dikirim ke Telegram
-app.post('/send-message', (req, res) => {
-  const { text } = req.body;
-  const targetChatId = 6447173930; // Ganti dengan chat ID kamu
-
-  if (!text) return res.status(400).json({ error: 'Text kosong' });
-
-  // 🔍 Analisis sentimen secara langsung di backend
   const result = sentiment.analyze(text);
   let classification = 'Netral';
   if (result.score > 0) classification = 'Positif';
   else if (result.score < 0) classification = 'Negatif';
 
-  // 💾 Simpan ke chatLogs agar muncul di frontend
+  const reply = `Pesan Anda diklasifikasikan sebagai: ${classification}`;
+
+  // Simpan log chat dari Telegram
   chatLogs.push({
-    user: 'Irfan', // atau bisa 'Frontend'
+    user: msg.from.username || msg.from.first_name || 'Pengguna',
+    from: 'telegram',
     text,
     classification,
     date: new Date()
   });
 
-  // 📤 Kirim ke Telegram (termasuk klasifikasi)
-  const response = `${text} \n(Klasifikasi: ${classification})`;
+  // Simpan balasan bot ke Telegram
+  chatLogs.push({
+    user: 'Bot',
+    from: 'bot',
+    text: reply,
+    classification,
+    date: new Date()
+  });
 
-  bot.sendMessage(targetChatId, response)
+  bot.sendMessage(chatId, reply, { parse_mode: 'Markdown' });
+});
+
+// ✅ 2. Endpoint untuk frontend mengirim pesan
+app.post('/send-message', (req, res) => {
+  const { text } = req.body;
+  const targetChatId = 6447173930; // <- Ganti dengan chat ID milikmu
+
+  if (!text) return res.status(400).json({ error: 'Text kosong' });
+
+  const result = sentiment.analyze(text);
+  let classification = 'Netral';
+  if (result.score > 0) classification = 'Positif';
+  else if (result.score < 0) classification = 'Negatif';
+
+  const reply = `Pesan Anda diklasifikasikan sebagai: ${classification}`;
+
+  // Simpan pesan dari web user
+  chatLogs.push({
+    user: 'Irfan',
+    from: 'sender',
+    text,
+    classification: null, // Pesan awal tidak diklasifikasi
+    date: new Date()
+  });
+
+  // Simpan balasan bot
+  chatLogs.push({
+    user: 'Bot',
+    from: 'bot',
+    text: reply,
+    date: new Date()
+  });
+
+  // Kirim ke Telegram juga
+  bot.sendMessage(targetChatId, reply)
     .then(() => res.status(200).json({ message: 'Terkirim dan dianalisis' }))
     .catch(err => res.status(500).json({ error: err.message }));
 });
 
-// ✅ Jalankan server
-app.listen(5000, () => {
-  console.log('✅ Backend berjalan di http://localhost:5000');
+// ✅ 3. Endpoint ambil semua chat logs
+app.get('/chats', (req, res) => {
+  // Optional: sortir berdasarkan waktu
+  chatLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  // Optional: batasi jika terlalu panjang
+  if (chatLogs.length > 200) {
+    chatLogs = chatLogs.slice(-100); // Simpan 100 terakhir
+  }
+
+  res.json(chatLogs);
+});
+
+// ✅ 4. Jalankan server
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server berjalan di http://localhost:${PORT}`);
 });
