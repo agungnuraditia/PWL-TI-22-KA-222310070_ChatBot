@@ -103,15 +103,32 @@
   border-radius: 16px;
   position: relative;
   max-width: 70%;
-  font-size: 14px;
+  font-size: 18px; /* ⬅️ Ubah dari 14px ke 18px */
+  font-weight: bold; /* ⬅️ Tambahkan ini untuk huruf tebal */
+  font-family: 'Poppins', 'Segoe UI', sans-serif; /* ⬅️ Tambahkan font modern */
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+.message-bubble.netral {
+  color: #333; /* abu-abu tua */
+}
+
+.message-bubble.positif {
+  color: green;
+}
+
+.message-bubble.negatif {
+  color: red;
 }
 
 .message-wrapper.sent .message-bubble {
   background-color: #4f46e5;
   color: white;
   border-bottom-right-radius: 4px;
+  max-width: fit-content;          /* Lebar maksimum bubble */
+  white-space: pre-wrap;     /* Bungkus teks dan pertahankan enter */
+  word-wrap: break-word;     /* Pecah kata panjang tanpa spasi */
+  display: inline-block;     /* Supaya bentuk bubble fleksibel */
 }
 
 .message-wrapper.received .message-bubble {

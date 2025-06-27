@@ -15,7 +15,9 @@ let chatLogs = [];
 
 const autoReplies = [
   { pattern: /apa kabar/i, response: "Kabar baik, ada yang bisa saya bantu?" },
+  { pattern: /hallo/i, response: "Hallo, ada yang bisa saya bantu?" },
   { pattern: /siapa kamu/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
+  {pattern: /siapa anda/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
   { pattern: /bisa bantu apa/i, response: "Saya bisa bantu menjawab pertanyaan dan klasifikasi sentimen pesan kamu." },
   { pattern: /terima kasih/i, response: "Sama-sama 😊" }
 ];
@@ -37,9 +39,9 @@ bot.on('text', (ctx) => {
   else if (result.score < 0) classification = 'Negatif';
 
   const matched = autoReplies.find(rule => rule.pattern.test(text));
-  const reply = matched
-    ? `${matched.response}\n\n(Pesan Anda diklasifikasikan sebagai: ${classification})`
-    : `Pesan Anda diklasifikasikan sebagai: ${classification}`;
+const reply = matched
+  ? matched.response
+  : classification;
 
   ctx.reply(reply);
   simpanLog(username, text, reply, classification);
@@ -56,9 +58,10 @@ app.post('/send-message', (req, res) => {
   else if (result.score < 0) classification = 'Negatif';
 
   const matched = autoReplies.find(rule => rule.pattern.test(text));
-  const reply = matched
-    ? `${matched.response}\n\n(Pesan Anda diklasifikasikan sebagai: ${classification})`
-    : `Pesan Anda diklasifikasikan sebagai: ${classification}`;
+const reply = matched
+  ? matched.response
+  : classification;
+
 
   // Tambahkan log Irfan (pengirim dari React)
   chatLogs.push(

@@ -85,7 +85,9 @@ const ChatWindow = () => {
                 {/* Bubble chat dan label */}
                 <div className="message-bubble-wrapper">
                   <div className={`message-bubble ${classification?.toLowerCase()}`}>
-                    <span className="message-text">{msg.text}</span>
+                    <span className="message-text">
+                    {msg.text.replace(/\s*\((?:Netral|Negatif|Positif)\)\s*/gi, '')}
+                    </span>
                     {classification && (
                       <span className={`label ${classification.toLowerCase()}`}>
                         {classification}
