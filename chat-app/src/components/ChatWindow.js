@@ -1,32 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './ChatWindow.css';
 import axios from 'axios';
 
 const ChatWindow = () => {
   const [telegramChats, setTelegramChats] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const bottomRef = useRef(null);
 
-  // Ambil data chat setiap 1 detik
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetch('http://localhost:5000/chats')
-        .then(res => res.json())
-        .then(data => setTelegramChats(data))
-        .catch(err => console.error("Gagal fetch:", err));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fungsi kirim pesan
+  // Kirim pesan
   const handleSend = () => {
     if (!inputMessage.trim()) return;
-
     const messageToSend = inputMessage;
     setInputMessage("");
 
     axios.post('http://localhost:5000/send-message', { text: messageToSend })
+      .then(() => {
+        setTimeout(() => {
+          bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      })
       .catch(err => console.error("Gagal kirim:", err));
   };
+
+  // Hapus semua chat
+  const handleDeleteChats = () => {
+    if (window.confirm("Yakin ingin menghapus semua chat?")) {
+      axios.delete('http://localhost:5000/chats')
+        .then(() => setTelegramChats([]))
+        .catch(err => console.error("Gagal hapus:", err));
+    }
+  };
+
+  // Ambil chat tiap detik
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch('http://localhost:5000/chats')
+        .then(res => res.json())
+        .then(data => {
+          const prevLength = telegramChats.length;
+          const newMessages = data.slice(prevLength);
+          const lastMsg = newMessages[newMessages.length - 1];
+
+          setTelegramChats(data);
+
+          if (lastMsg && lastMsg.from === 'sender') {
+            setTimeout(() => {
+              bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }
+        })
+        .catch(err => console.error("Gagal fetch:", err));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [telegramChats]);
 
   // Format tanggal
   const formatDate = (dateStr) => {
@@ -43,6 +69,7 @@ const ChatWindow = () => {
         <div className="user-info">
           <img src="/avatars/irfan.jpg" alt="Irfan" className="avatar-header" />
           <h3>ChatBot - Irfan</h3>
+          <button onClick={handleDeleteChats} className="hapus-chat-btn">🗑️</button>
         </div>
         <div className="chat-actions">
           <img src="/icons/phone.png" alt="Call" className="icon" />
@@ -55,7 +82,6 @@ const ChatWindow = () => {
       <div className="messages">
         {telegramChats.map((msg, index) => {
           if (!msg) return null;
-
           const isSender = msg.from === 'sender';
           const isFromBot = msg.from === 'bot';
           const senderName = msg.user || (isSender ? "Irfan" : isFromBot ? "BOT" : "Pengguna");
@@ -68,10 +94,8 @@ const ChatWindow = () => {
 
           return (
             <div key={index}>
-              {/* Tanggal */}
               {showDate && <div className="date-label">{dateStr}</div>}
 
-              {/* Bubble */}
               <div className={`message-wrapper ${isSender ? 'sent' : 'received'}`}>
                 {/* Avatar kiri */}
                 {!isSender && (
@@ -82,35 +106,38 @@ const ChatWindow = () => {
                   </div>
                 )}
 
-                {/* Bubble chat dan label */}
-      <div className="message-bubble-wrapper">
-<div className={`message-bubble ${classification?.toLowerCase()}`}>
-  <div className="text-with-label">
-    <span className="message-text">{msg.text}</span>
-    {classification && (
-      <span className={`label-inline ${classification.toLowerCase()}`}>
-        {classification}
-      </span>
-    )}
+                {/* Bubble chat */}
+                <div className="message-bubble-wrapper">
+             <div className="message-bubble-container">
+  <div className={`message-bubble ${classification?.toLowerCase()}`}>
+    <div className="text-with-label">
+      {isSender && classification && (
+        <span className={`label-inline ${classification.toLowerCase()}`}>
+          {classification}
+        </span>
+      )}
+      <span className="message-text">{msg.text}</span>
+
+      {!isSender && classification && (
+        <span className={`label-inline ${classification.toLowerCase()}`}>
+          {classification}
+        </span>
+      )}
+    </div>
   </div>
 </div>
 
-</div>
+                </div>
 
-
-
-                {/* Avatar kanan untuk pengirim */}
+                {/* Avatar kanan */}
                 {isSender && (
-                  <img
-                    src="/avatars/irfan.jpg"
-                    alt="Irfan"
-                    className="avatars"
-                  />
+                  <img src="/avatars/irfan.jpg" alt="Irfan" className="avatars" />
                 )}
               </div>
             </div>
           );
         })}
+        <div ref={bottomRef} />
       </div>
 
       {/* INPUT */}

@@ -8,7 +8,13 @@
   font-family: 'Segoe UI', sans-serif;
   background-color: #f4f4f4;
 }
-
+.chat-item {
+  display: flex;
+  align-self: center;
+  text-align: left;
+  padding: 14px 20px;
+  font-family: 'Segoe UI', sans-serif;
+}
 /* Header */
 .chat-header {
   display: flex;
@@ -78,7 +84,7 @@
   background-color: #6366f1;
   color: white;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 12px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -103,7 +109,7 @@
   border-radius: 24px;
   position: relative;
   max-width: 70%;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
   font-family: 'Poppins', 'Segoe UI', sans-serif;
   white-space: pre-wrap;
@@ -147,8 +153,8 @@
 .text-with-label {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
 }
 
 .label-inline {
@@ -173,8 +179,43 @@
   background-color: #a1a1aa;
   color: white;
 }
+/* Warna teks berdasarkan sentimen */
+.text-with-label.negatif .message-text {
+  color: #e74c3c; /* merah */
+  font-weight: bold;
+}
+
+.text-with-label.positif .message-text {
+  color: #2ecc71; /* hijau */
+  font-weight: bold;
+}
+
+.text-with-label.netral .message-text {
+  color: #555;
+}
+
 .label {
   display: none;
+}
+
+.label-outside {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: #fff;
+}
+
+.label-outside.positif {
+  background-color: #28a745;
+}
+.label-outside.netral {
+  background-color: #6c757d;
+}
+.label-outside.negatif {
+  background-color: #dc3545;
 }
 
 /* Input Chat */
@@ -207,4 +248,18 @@
 
 .chat-input button.kirim-button:hover {
   background-color: #4338ca;
+}
+.hapus-chat-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.hapus-chat-btn:hover {
+  background-color: #d93030;
 }
