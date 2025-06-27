@@ -83,18 +83,21 @@ const ChatWindow = () => {
                 )}
 
                 {/* Bubble chat dan label */}
-                <div className="message-bubble-wrapper">
-                  <div className={`message-bubble ${classification?.toLowerCase()}`}>
-                    <span className="message-text">
-                    {msg.text.replace(/\s*\((?:Netral|Negatif|Positif)\)\s*/gi, '')}
-                    </span>
-                    {classification && (
-                      <span className={`label ${classification.toLowerCase()}`}>
-                        {classification}
-                      </span>
-                    )}
-                  </div>
-                </div>
+      <div className="message-bubble-wrapper">
+<div className={`message-bubble ${classification?.toLowerCase()}`}>
+  <div className="text-with-label">
+    <span className="message-text">{msg.text}</span>
+    {classification && (
+      <span className={`label-inline ${classification.toLowerCase()}`}>
+        {classification}
+      </span>
+    )}
+  </div>
+</div>
+
+</div>
+
+
 
                 {/* Avatar kanan untuk pengirim */}
                 {isSender && (

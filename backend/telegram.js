@@ -8,20 +8,22 @@ app.use(cors());
 app.use(express.json());
 
 const sentiment = new Sentiment();
-const token = '7919715969:AAEL6YxFPysmh4jngTgMwIAfO_YoPZCDV-0'; // ← ganti dengan token asli
+const token = '7919715969:AAEL6YxFPysmh4jngTgMwIAfO_YoPZCDV-0'; // Ganti dengan token asli kamu
 const bot = new Telegraf(token);
 
 let chatLogs = [];
 
+// Daftar balasan otomatis
 const autoReplies = [
   { pattern: /apa kabar/i, response: "Kabar baik, ada yang bisa saya bantu?" },
   { pattern: /hallo/i, response: "Hallo, ada yang bisa saya bantu?" },
   { pattern: /siapa kamu/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
-  {pattern: /siapa anda/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
+  { pattern: /siapa anda/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
   { pattern: /bisa bantu apa/i, response: "Saya bisa bantu menjawab pertanyaan dan klasifikasi sentimen pesan kamu." },
   { pattern: /terima kasih/i, response: "Sama-sama 😊" }
 ];
 
+// Simpan log ke array
 function simpanLog(user, textIn, textOut, classification) {
   const now = new Date();
   chatLogs.push(
@@ -30,27 +32,29 @@ function simpanLog(user, textIn, textOut, classification) {
   );
 }
 
+// Balasan otomatis untuk user Telegram
 bot.on('text', (ctx) => {
   const text = ctx.message.text;
   const username = ctx.from.username || ctx.from.first_name || 'Pengguna';
   const result = sentiment.analyze(text);
+
   let classification = 'Netral';
   if (result.score > 0) classification = 'Positif';
   else if (result.score < 0) classification = 'Negatif';
 
   const matched = autoReplies.find(rule => rule.pattern.test(text));
-const reply = matched
-  ? matched.response
-  : classification;
+  const reply = matched
+    ? matched.response
+    : "Maaf, saya belum paham maksud Anda.";
 
   ctx.reply(reply);
   simpanLog(username, text, reply, classification);
 });
 
-// Endpoint dari React
+// Endpoint dari React (mengirim pesan)
 app.post('/send-message', (req, res) => {
   const { text } = req.body;
-  const targetChatId = 6447173930;
+  const targetChatId = 6447173930; // Ganti dengan chat ID target
 
   const result = sentiment.analyze(text);
   let classification = 'Netral';
@@ -58,12 +62,10 @@ app.post('/send-message', (req, res) => {
   else if (result.score < 0) classification = 'Negatif';
 
   const matched = autoReplies.find(rule => rule.pattern.test(text));
-const reply = matched
-  ? matched.response
-  : classification;
+  const reply = matched
+    ? matched.response
+    : "Maaf, saya belum paham maksud Anda.";
 
-
-  // Tambahkan log Irfan (pengirim dari React)
   chatLogs.push(
     { user: 'Irfan', from: 'sender', text, classification: null, date: new Date() },
     { user: 'Bot', from: 'bot', text: reply, classification, date: new Date() }
@@ -74,12 +76,14 @@ const reply = matched
     .catch(err => res.status(500).json({ error: err.message }));
 });
 
+// Endpoint untuk ambil semua log chat
 app.get('/chats', (req, res) => {
   chatLogs.sort((a, b) => new Date(a.date) - new Date(b.date));
-  if (chatLogs.length > 200) chatLogs = chatLogs.slice(-100);
+  if (chatLogs.length > 200) chatLogs = chatLogs.slice(-100); // batas 100 terakhir
   res.json(chatLogs);
 });
 
+// Jalankan server
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`✅ Server berjalan di http://localhost:${PORT}`);
