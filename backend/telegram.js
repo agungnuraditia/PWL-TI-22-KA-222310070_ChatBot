@@ -25,8 +25,8 @@ const autoReplies = [
   { pattern: /terima kasih|terimakasih/i, response: "Sama-sama 😊" },
 
   // Tambahan untuk kata positif & negatif
-  { pattern: /bad|jelek|buruk|kau anjing/i, response: "Mohon maaf jika ada yang kurang berkenan 😔" },
-  { pattern: /nice|bagus|baik/i, response: "Terima kasih! Senang bisa membantu 😊" }
+  { pattern: /bad|jelek|buruk|kau|anjing/i, response: "Mohon maaf jika ada yang kurang berkenan 😔" },
+  { pattern: /nice|bagus|baik|maaf|sorry/i, response: "Terima kasih! Senang bisa membantu 😊" }
 ];
 
 // === FUNGSI SIMPAN CHAT ===
