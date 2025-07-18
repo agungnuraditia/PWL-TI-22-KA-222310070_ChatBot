@@ -108,7 +108,7 @@ const ChatWindow = () => {
 
                 {/* Bubble chat */}
                 <div className="message-bubble-wrapper">
-             <div className="message-bubble-container">
+          <div className="message-bubble-container">
   <div className={`message-bubble ${classification?.toLowerCase()}`}>
     <div className="text-with-label">
       {isSender && classification && (

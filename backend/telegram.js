@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const Sentiment = require('sentiment');
@@ -5,103 +6,110 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 
-// === KONFIGURASI ===
+// === KONFIGURASI EXPRESS ===
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const sentiment = new Sentiment();
-const token = process.env.BOT_TOKEN || '7919715969:AAEL6YxFPysmh4jngTgMwIAfO_YoPZCDV-0';
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const PORT = process.env.PORT || 5000;
+
+if (!token) {
+    console.error("❌ BOT TOKEN tidak ditemukan! Cek .env dan variabel TELEGRAM_BOT_TOKEN");
+    process.exit(1);
+}
+
 const bot = new Telegraf(token);
 
-// === BALASAN OTOMATIS ===
+// === AUTO REPLIES ===
 const autoReplies = [
     { pattern: /apa kabar/i, response: "Kabar baik, ada yang bisa saya bantu?" },
     { pattern: /hallo/i, response: "Hallo, ada yang bisa saya bantu?" },
-    { pattern: /siapa kamu/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
-    { pattern: /siapa anda/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
+    { pattern: /siapa kamu|siapa anda/i, response: "Saya chatbot pintar yang dibuat untuk membantu Irfan." },
     { pattern: /bisa bantu apa/i, response: "Saya bisa bantu menjawab pertanyaan dan klasifikasi sentimen pesan kamu." },
     { pattern: /terima kasih|terimakasih/i, response: "Sama-sama 😊" },
     { pattern: /bad|jelek|buruk|kau|anjing/i, response: "Mohon maaf jika ada yang kurang berkenan 😔" },
     { pattern: /nice|bagus|baik|maaf|sorry/i, response: "Terima kasih! Senang bisa membantu 😊" }
 ];
 
-// === FUNGSI SIMPAN CHAT KE DATABASE ===
+// === SIMPAN LOG KE DATABASE ===
 function simpanLog(user, platform, text, classification) {
     db.query(
         'INSERT INTO chat_logs (user, platform, text, classification) VALUES (?, ?, ?, ?)',
         [user, platform, text, classification],
-        (err, results) => {
-            if (err) {
-                console.error('❌ Error inserting to DB:', err);
-            } else {
-                console.log(`✅ Log inserted with ID: ${results.insertId}`);
-            }
+        (err) => {
+            if (err) console.error('❌ Error insert chat_logs:', err);
         }
     );
 }
 
-// === BOT MENERIMA PESAN DARI TELEGRAM ===
+function simpanHistory(user, platform, text, classification) {
+    db.query(
+        'INSERT INTO chat_history (user, platform, text, classification) VALUES (?, ?, ?, ?)',
+        [user, platform, text, classification],
+        (err) => {
+            if (err) console.error('❌ Error insert chat_history:', err);
+        }
+    );
+}
+
+// === HANDLE PESAN MASUK DARI TELEGRAM ===
 bot.on('text', (ctx) => {
     const text = ctx.message.text;
     const username = ctx.from.username || ctx.from.first_name || 'Pengguna';
-    const result = sentiment.analyze(text);
 
-    let userClassification = 'Netral';
-    if (result.score > 0) userClassification = 'Positif';
-    else if (result.score < 0) userClassification = 'Negatif';
+    const userSentiment = sentiment.analyze(text);
+    const userClassification = userSentiment.score > 0 ? 'Positif' :
+                            userSentiment.score < 0 ? 'Negatif' : 'Netral';
 
     const matched = autoReplies.find(rule => rule.pattern.test(text));
-    const reply = matched
-        ? matched.response
-        : "Maaf, saya belum paham maksud Anda.";
+    const reply = matched ? matched.response : "Maaf, saya belum paham maksud Anda.";
 
     const botSentiment = sentiment.analyze(reply);
-    let botClassification = 'Netral';
-    if (botSentiment.score > 0) botClassification = 'Positif';
-    else if (botSentiment.score < 0) botClassification = 'Negatif';
+    const botClassification = botSentiment.score > 0 ? 'Positif' :
+                            botSentiment.score < 0 ? 'Negatif' : 'Netral';
 
-    // Simpan log user dan bot ke database
+    // Simpan percakapan ke DB
     simpanLog(username, 'telegram', text, userClassification);
     simpanLog('Bot', 'bot', reply, botClassification);
+    simpanHistory(username, 'telegram', text, userClassification);
+    simpanHistory('Bot', 'bot', reply, botClassification);
 
     ctx.reply(reply);
 });
 
-// === ENDPOINT FRONTEND UNTUK KIRIM PESAN SECARA MANUAL DARI FRONTEND ===
+// === API POST /send-message ===
 app.post('/send-message', (req, res) => {
     const { text } = req.body;
-    const targetChatId = 6447173930; // Ubah sesuai chat ID tujuan
+    const targetChatId = 6447173930; // GANTI ke chat_id tujuan
 
-    const userResult = sentiment.analyze(text);
-    let userClassification = 'Netral';
-    if (userResult.score > 0) userClassification = 'Positif';
-    else if (userResult.score < 0) userClassification = 'Negatif';
+    const userSentiment = sentiment.analyze(text);
+    const userClassification = userSentiment.score > 0 ? 'Positif' :
+                            userSentiment.score < 0 ? 'Negatif' : 'Netral';
 
     const matched = autoReplies.find(rule => rule.pattern.test(text));
-    const reply = matched
-        ? matched.response
-        : "Maaf, saya belum paham maksud Anda.";
+    const reply = matched ? matched.response : "Maaf, saya belum paham maksud Anda.";
 
-    const botResult = sentiment.analyze(reply);
-    let botClassification = 'Netral';
-    if (botResult.score > 0) botClassification = 'Positif';
-    else if (botResult.score < 0) botClassification = 'Negatif';
+    const botSentiment = sentiment.analyze(reply);
+    const botClassification = botSentiment.score > 0 ? 'Positif' :
+                            botSentiment.score < 0 ? 'Negatif' : 'Netral';
 
-    // Simpan ke database
     simpanLog('Irfan', 'sender', text, userClassification);
     simpanLog('Bot', 'bot', reply, botClassification);
+    simpanHistory('Irfan', 'sender', text, userClassification);
+    simpanHistory('Bot', 'bot', reply, botClassification);
 
     bot.telegram.sendMessage(targetChatId, reply)
         .then(() => res.status(200).json({ message: 'Terkirim dan dianalisis' }))
         .catch(err => res.status(500).json({ error: err.message }));
 });
 
-// === ENDPOINT UNTUK FRONTEND MENAMPILKAN HISTORI CHAT ===
+// === API GET /chats ===
 app.get('/chats', (req, res) => {
     db.query('SELECT * FROM chat_logs ORDER BY date ASC LIMIT 100', (err, results) => {
         if (err) {
-            console.error('❌ Error fetching chats:', err);
+            console.error('❌ Error fetch chats:', err);
             res.status(500).json({ error: 'Database error' });
         } else {
             res.json(results);
@@ -109,22 +117,23 @@ app.get('/chats', (req, res) => {
     });
 });
 
-// === ENDPOINT UNTUK MENGHAPUS SEMUA HISTORI CHAT ===
+// === API DELETE /chats ===
 app.delete('/chats', (req, res) => {
-    db.query('DELETE FROM chat_logs', (err, results) => {
+    db.query('DELETE FROM chat_logs', (err) => {
         if (err) {
-            console.error('❌ Error deleting chats:', err);
+            console.error('❌ Error delete chats:', err);
             res.status(500).json({ error: 'Database error' });
         } else {
-            res.json({ message: 'Semua chat berhasil dihapus dari database' });
+            res.json({ message: 'Semua chat berhasil dihapus' });
         }
     });
 });
 
-// === JALANKAN SERVER ===
-const PORT = process.env.PORT || 5000;
+// === JALANKAN SERVER EXPRESS ===
 app.listen(PORT, () => {
     console.log(`✅ Server berjalan di http://localhost:${PORT}`);
 });
 
+// === JALANKAN BOT TELEGRAM ===
 bot.launch();
+console.log("🤖 Bot Telegram aktif...");
