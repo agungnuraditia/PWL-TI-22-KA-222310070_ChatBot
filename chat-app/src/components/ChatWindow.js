@@ -82,7 +82,7 @@ const ChatWindow = () => {
       <div className="messages">
         {telegramChats.map((msg, index) => {
           if (!msg) return null;
-          const isSender = msg.from === 'sender';
+          const isSender = msg.user !== 'Bot';
           const isFromBot = msg.from === 'bot';
           const senderName = msg.user || (isSender ? "Irfan" : isFromBot ? "BOT" : "Pengguna");
           const classification = msg.classification;
