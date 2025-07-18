@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
-    host: 'localhost',
+    host: 'db',
     user: 'root',
     password: '1234', // atau 'password' jika ada
     database: 'chatbot_db'
