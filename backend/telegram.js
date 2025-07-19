@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const Sentiment = require('sentiment');
@@ -8,7 +7,9 @@ const db = require('./db');
 
 // === KONFIGURASI EXPRESS ===
 const app = express();
-app.use(cors());
+
+// === AKTIFKAN CORS DI SINI ===
+app.use(cors()); // <<<<<< Tambahan penting
 app.use(express.json());
 
 const sentiment = new Sentiment();
@@ -127,6 +128,11 @@ app.delete('/chats', (req, res) => {
             res.json({ message: 'Semua chat berhasil dihapus' });
         }
     });
+});
+
+// === API HEALTHCHECK UNTUK DOCKER ===
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
 });
 
 // === JALANKAN SERVER EXPRESS ===
